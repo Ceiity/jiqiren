@@ -44,6 +44,20 @@ export default async function adminRoutes(app: FastifyInstance) {
         "SELECT COUNT(*) AS total, SUM(CASE WHEN status = 'active' AND (expires_at IS NULL OR expires_at > ?) THEN 1 ELSE 0 END) AS active, COALESCE(SUM(view_count),0) AS views, COALESCE(SUM(download_count),0) AS downloads FROM shares WHERE owner_id = ?",
       )
       .get(now(), u.id) as { total: number; active: number | null; views: number; downloads: number };
+    const since = now() - 13 * DAY;
+    const daily = db
+      .prepare(
+        "SELECT strftime('%Y-%m-%d', created_at / 1000, 'unixepoch', 'localtime') AS day, COUNT(*) AS c, COALESCE(SUM(size),0) AS b FROM files WHERE owner_id = ? AND created_at >= ? GROUP BY day",
+      )
+      .all(u.id, since - DAY) as { day: string; c: number; b: number }[];
+    const shareDaily = db
+      .prepare(
+        `SELECT strftime('%Y-%m-%d', l.created_at / 1000, 'unixepoch', 'localtime') AS day,
+                SUM(CASE WHEN l.action = 'view' THEN 1 ELSE 0 END) AS views,
+                SUM(CASE WHEN l.action = 'download' THEN 1 ELSE 0 END) AS downloads
+         FROM share_access_logs l JOIN shares s ON s.id = l.share_id WHERE s.owner_id = ? AND l.created_at >= ? GROUP BY day`,
+      )
+      .all(u.id, since - DAY) as { day: string; views: number; downloads: number }[];
     const byCat: Record<string, { count: number; bytes: number }> = {};
     for (const c of cats) byCat[c.category] = { count: c.c, bytes: c.b };
     return ok({
@@ -55,6 +69,8 @@ export default async function adminRoutes(app: FastifyInstance) {
       trash: { count: trash.c, bytes: trash.b },
       recent,
       shares: { total: shares.total, active: shares.active ?? 0, views: shares.views, downloads: shares.downloads },
+      daily,
+      shareDaily,
     });
   });
 

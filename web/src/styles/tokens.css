@@ -1,0 +1,115 @@
+/* ------------------------------------------------------------------
+   Design tokens — FlClash-inspired MD3 system
+   Colours are injected at runtime by ThemeProvider (theme/scheme.ts).
+   ------------------------------------------------------------------ */
+:root {
+  /* fallback palette (light, seed #007AFF) — replaced at runtime */
+  --primary: #007aff;
+  --on-primary: #fff;
+  --page: #eff0f3;
+  --card: #fafafc;
+  --block: #eff0f3;
+  --inset: #e2e3e6;
+  --chrome: #e2e3e6;
+  --float: #fafafc;
+  --float-block: #eff0f3;
+  --on-surface: #1a1c1f;
+  --on-surface-variant: #43474e;
+  --outline: #73777f;
+  --error: #ba1a1a;
+  --error-container: #ffdad6;
+  --on-error-container: #93000a;
+  --destructive: #ff3b30;
+  --success: #1e6c35;
+  --success-container: #b7f1bf;
+  --on-success-container: #005321;
+  --warning: #8b5000;
+  --warning-container: #ffdcbe;
+  --on-warning-container: #6a3b00;
+
+  /* derived */
+  --divider: color-mix(in srgb, var(--on-surface) 14%, transparent);
+  --hover: color-mix(in srgb, var(--on-surface) 4%, transparent);
+  --pressed: color-mix(in srgb, var(--on-surface) 8%, transparent);
+  --selected-fill: color-mix(in srgb, var(--on-surface) 8%, transparent);
+  --primary-hover: color-mix(in srgb, var(--primary) 8%, transparent);
+  --primary-soft: color-mix(in srgb, var(--primary) 14%, transparent);
+  --primary-tonal: color-mix(in srgb, var(--primary) 16%, var(--block));
+  --scrim: rgb(0 0 0 / 0.32);
+  --shadow-float: 0 1px 2px rgb(0 0 0 / 0.06), 0 8px 28px rgb(0 0 0 / 0.12);
+  --shadow-card: 0 1px 2px rgb(0 0 0 / 0.04), 0 2px 10px rgb(0 0 0 / 0.04);
+  --shadow-dock: 0 2px 6px rgb(0 0 0 / 0.08), 0 12px 40px rgb(0 0 0 / 0.16);
+
+  /* corner radii (AppCorner) */
+  --r-xs: 4px;
+  --r-sm: 8px;
+  --r-item: 10px;
+  --r-md: 16px;
+  --r-lg: 20px;
+  --r-xl: 24px;
+  --r-xxl: 28px;
+  --r-alert: 34px;
+  --r-full: 999px;
+
+  /* spacing */
+  --gap: 12px;
+  --pad: 16px;
+  --page-x: 24px;
+
+  /* typography — iOS dynamic type scale */
+  --font-sans: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Inter', 'PingFang SC', 'HarmonyOS Sans SC', 'MiSans',
+    'Microsoft YaHei UI', 'Microsoft YaHei', 'Noto Sans SC', 'Segoe UI', Roboto, system-ui, sans-serif;
+  --font-mono: 'SF Mono', 'JetBrains Mono', 'Cascadia Code', Menlo, Consolas, monospace;
+
+  /* motion */
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --ease-emphasized: cubic-bezier(0.3, 0, 0, 1);
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --dur-fast: 150ms;
+  --dur-mid: 200ms;
+  --dur-slow: 300ms;
+
+  --sidebar-w: 232px;
+  --sidebar-compact-w: 72px;
+  --toolbar-h: 72px;
+  --dock-h: 64px;
+
+  color-scheme: light;
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --scrim: rgb(0 0 0 / 0.5);
+  --shadow-float: 0 1px 2px rgb(0 0 0 / 0.3), 0 10px 32px rgb(0 0 0 / 0.45);
+  --shadow-card: none;
+  --shadow-dock: 0 2px 8px rgb(0 0 0 / 0.35), 0 14px 44px rgb(0 0 0 / 0.5);
+  --primary-tonal: color-mix(in srgb, var(--primary) 22%, var(--block));
+}
+
+:root[data-density='compact'] {
+  --gap: 10px;
+  --pad: 14px;
+}
+
+:root[data-motion='off'] *,
+:root[data-motion='off'] *::before,
+:root[data-motion='off'] *::after {
+  transition-duration: 0ms !important;
+  animation-duration: 0ms !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root:not([data-motion='full-forced']) *,
+  :root:not([data-motion='full-forced']) *::before,
+  :root:not([data-motion='full-forced']) *::after {
+    transition-duration: 1ms !important;
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
+
+@media (max-width: 760px) {
+  :root {
+    --page-x: 16px;
+  }
+}

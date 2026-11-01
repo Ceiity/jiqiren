@@ -32,7 +32,7 @@ export default async function authRoutes(app: FastifyInstance) {
 
   app.get('/api/public/config', async () => {
     const s = getSettings();
-    return ok({ siteName: s.siteName, siteIcon: s.siteIcon, allowRegister: s.allowRegister, needsSetup: setupState().needsSetup });
+    return ok({ siteName: s.siteName, siteIcon: s.siteIcon, publicUrl: s.publicUrl, allowRegister: s.allowRegister, needsSetup: setupState().needsSetup });
   });
 
   app.post('/api/setup', loginLimit, async (req, reply) => {
