@@ -1,0 +1,41 @@
+# 奶龙云盘 — production stack
+#   cp .env.example .env && docker compose up -d --build
+name: nailong-pan
+
+services:
+  api:
+    build: ./server
+    image: nailong-pan-api:latest
+    restart: unless-stopped
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      DATA_DIR: /data
+    volumes:
+      # database, files, thumbnails cache, temp upload chunks, logs, avatars
+      - ${DATA_PATH:-./data}:/data
+    expose:
+      - "8080"
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:8080/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      start_period: 20s
+      retries: 3
+    logging:
+      driver: json-file
+      options: { max-size: "20m", max-file: "5" }
+
+  web:
+    build: ./web
+    image: nailong-pan-web:latest
+    restart: unless-stopped
+    depends_on:
+      api:
+        condition: service_healthy
+    ports:
+      - "${BIND_ADDR:-0.0.0.0}:${HTTP_PORT:-8080}:80"
+    logging:
+      driver: json-file
+      options: { max-size: "20m", max-file: "5" }

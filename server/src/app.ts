@@ -2,6 +2,9 @@ import Fastify, { type FastifyError } from 'fastify';
 import cookie from '@fastify/cookie';
 import rateLimit from '@fastify/rate-limit';
 import multipart from '@fastify/multipart';
+import fs from 'node:fs';
+import path from 'node:path';
+import pino from 'pino';
 import { config } from './config.js';
 import { AppError } from './lib/errors.js';
 import { resolveSession } from './services/users.js';
@@ -14,14 +17,26 @@ const MUTATING = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
 /** endpoints usable without an authenticated session (CSRF token not yet available) */
 const CSRF_EXEMPT = [/^\/api\/auth\/(login|register|logout)$/, /^\/api\/setup$/, /^\/api\/public\//];
 
+/** Logs to stdout (docker logs) and to <LOG_DIR>/app.log (rotated at 50 MB on start). */
+function createLogger() {
+  fs.mkdirSync(config.logDir, { recursive: true });
+  const file = path.join(config.logDir, 'app.log');
+  try {
+    if (fs.statSync(file).size > 50 * 1024 * 1024) fs.renameSync(file, `${file}.1`);
+  } catch {
+    /* no file yet */
+  }
+  return pino(
+    { level: process.env.LOG_LEVEL ?? 'info', redact: ['req.headers.cookie', 'req.headers["x-csrf-token"]'] },
+    pino.multistream([{ stream: process.stdout }, { stream: pino.destination({ dest: file, sync: false, mkdir: true }) }]),
+  );
+}
+
 export async function buildApp() {
   const app = Fastify({
-    trustProxy: config.trustProxy,
+    trustProxy: config.trustProxy as unknown as boolean, // hop count is supported at runtime
     bodyLimit: 1024 * 1024,
-    logger: {
-      level: process.env.LOG_LEVEL ?? 'info',
-      redact: ['req.headers.cookie', 'req.headers["x-csrf-token"]'],
-    },
+    loggerInstance: createLogger(),
     disableRequestLogging: config.env === 'production',
   });
 

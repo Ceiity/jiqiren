@@ -512,3 +512,29 @@
   width: 24px;
   height: 24px;
 }
+
+@media (max-height: 860px) and (min-width: 761px) {
+  .side-item {
+    height: 36px;
+  }
+  .sidebar-nav {
+    gap: 2px;
+  }
+  .sidebar-gap {
+    height: 6px;
+  }
+  .sidebar-new {
+    padding: 4px 0 8px;
+  }
+  .sidebar-new-btn {
+    height: 44px;
+  }
+  .sidebar-top {
+    gap: 2px;
+  }
+  .sidebar.expanded .side-quota {
+    height: 66px;
+    padding-top: 8px;
+    padding-bottom: 8px;
+  }
+}

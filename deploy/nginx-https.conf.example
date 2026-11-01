@@ -1,0 +1,36 @@
+# 宿主机 Nginx + Let's Encrypt (certbot) 反向代理示例
+# 1) .env 中设置：BIND_ADDR=127.0.0.1  HTTP_PORT=8080  TRUST_PROXY=2
+# 2) 申请证书：sudo certbot certonly --nginx -d pan.example.com
+# 3) 保存为 /etc/nginx/sites-available/nailong-pan 并启用，nginx -t && systemctl reload nginx
+
+server {
+    listen 80;
+    server_name pan.example.com;
+    return 301 https://$host$request_uri;
+}
+
+server {
+    listen 443 ssl http2;
+    server_name pan.example.com;
+
+    ssl_certificate     /etc/letsencrypt/live/pan.example.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/pan.example.com/privkey.pem;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    add_header Strict-Transport-Security "max-age=31536000" always;
+
+    client_max_body_size 80m;
+
+    location / {
+        proxy_pass http://127.0.0.1:8080;
+        proxy_http_version 1.1;
+        proxy_set_header Host $http_host;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto https;
+        proxy_set_header X-Forwarded-Host $http_host;
+        proxy_request_buffering off;
+        proxy_buffering off;
+        proxy_max_temp_file_size 0;
+        proxy_read_timeout 1h;
+        proxy_send_timeout 1h;
+    }
+}

@@ -1,0 +1,16 @@
+# Caddy 自动申请并续期 HTTPS 证书
+# 1) .env 中设置：BIND_ADDR=127.0.0.1  HTTP_PORT=8080  TRUST_PROXY=2
+# 2) 将下面的域名替换为你的域名，保存为 /etc/caddy/Caddyfile，然后 systemctl reload caddy
+pan.example.com {
+	encode zstd gzip
+	request_body {
+		max_size 80MB
+	}
+	reverse_proxy 127.0.0.1:8080 {
+		flush_interval -1
+		transport http {
+			read_timeout 1h
+			write_timeout 1h
+		}
+	}
+}

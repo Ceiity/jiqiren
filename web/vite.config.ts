@@ -11,14 +11,5 @@ export default defineConfig({
   build: {
     target: 'es2020',
     chunkSizeWarningLimit: 1200,
-    rollupOptions: {
-      output: {
-        manualChunks: {
-          react: ['react', 'react-dom', 'react-router-dom'],
-          motion: ['framer-motion'],
-          query: ['@tanstack/react-query', '@tanstack/react-virtual'],
-        },
-      },
-    },
   },
 });

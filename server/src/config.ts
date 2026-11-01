@@ -27,8 +27,17 @@ export const config = {
   tempDir: path.resolve(process.env.TEMP_DIR ?? path.join(dataDir, 'tmp')),
   cacheDir: path.resolve(process.env.CACHE_DIR ?? path.join(dataDir, 'cache')),
   logDir: path.resolve(process.env.LOG_DIR ?? path.join(dataDir, 'logs')),
-  /** behind nginx / reverse proxy */
-  trustProxy: bool('TRUST_PROXY', true),
+  /**
+   * Reverse-proxy trust: a hop count (1 = only the bundled nginx, 2 = nginx behind another HTTPS proxy),
+   * or true/false. Determines client IP (rate limits, logs) and https detection for Secure cookies.
+   */
+  trustProxy: ((): boolean | number => {
+    const raw = (process.env.TRUST_PROXY ?? '1').trim().toLowerCase();
+    if (raw === 'true') return true;
+    if (raw === 'false' || raw === '0') return false;
+    const n = Number(raw);
+    return Number.isInteger(n) && n > 0 ? n : 1;
+  })(),
   /** set cookies with Secure flag. 'auto' = based on request protocol */
   cookieSecure: (process.env.COOKIE_SECURE ?? 'auto') as 'auto' | 'true' | 'false',
   sessionDays: int('SESSION_DAYS', 30),
